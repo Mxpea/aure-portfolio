@@ -306,7 +306,7 @@ export default function HeroSection() {
               animate={{ opacity: 1 }}
               transition={{ duration: 1, delay: 1.2 }}
             >
-              创意开发者 & 设计师 — 探索代码与美学的无限可能
+              创意开发者 & 设计师 — Beyond the infinity
             </motion.p>
 
             {/* Buttons */}

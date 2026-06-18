@@ -180,9 +180,9 @@ export default function AboutSection() {
           transition={{ duration: 0.6, delay: 0.15 }}
         >
           <p className="text-sm md:text-base lg:text-lg text-muted-foreground leading-relaxed">
-            我是一名创意通才，热衷于探索设计与技术的无限可能。
-            从前端界面到视觉设计，从交互体验到创意实验，
-            我相信代码与美学的结合能够创造出令人惊叹的数字体验。
+            这是我的 GitHub 活动概览，展示了我在开源社区的参与情况和贡献历程。通过这些数据，你可以更好地了解我的技术兴趣、活跃度以及与其他开发者的互动。
+            
+            
           </p>
         </motion.div>
 

@@ -46,7 +46,18 @@ export default function ContactSection() {
 
   const copyEmail = async () => {
     try {
-      await navigator.clipboard.writeText(email);
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(email);
+      } else {
+        const ta = document.createElement("textarea");
+        ta.value = email;
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+      }
       setEmailCopied(true);
       setTimeout(() => setEmailCopied(false), 2000);
     } catch (err) {
