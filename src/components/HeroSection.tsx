@@ -21,21 +21,32 @@ export default function HeroSection() {
 
   const bgX = useSpring(mouseX, { damping: 40, stiffness: 40 });
   const bgY = useSpring(mouseY, { damping: 40, stiffness: 40 });
-  const fgX = useSpring(mouseX, { damping: 30, stiffness: 120 });
-  const fgY = useSpring(mouseY, { damping: 30, stiffness: 120 });
+  const fgX = useSpring(mouseX, { damping: 30, stiffness: 80 });
+  const fgY = useSpring(mouseY, { damping: 30, stiffness: 80 });
 
-  const rotateX = useSpring(useMotionValue(0), { damping: 30, stiffness: 150 });
-  const rotateY = useSpring(useMotionValue(0), { damping: 30, stiffness: 150 });
+  const rotateX = useSpring(useMotionValue(0), { damping: 30, stiffness: 80 });
+  const rotateY = useSpring(useMotionValue(0), { damping: 30, stiffness: 80 });
 
   const bgTranslateX = useTransform(bgX, (v) => v * 0.02);
   const bgTranslateY = useTransform(bgY, (v) => v * 0.02);
   const fgTranslateX = useTransform(fgX, (v) => v * 0.04);
   const fgTranslateY = useTransform(fgY, (v) => v * 0.04 - 10);
 
+  // Decorative element transforms - all through spring values
+  const decoBgX = useTransform(bgX, (v) => v * 0.06);
+  const decoBgY = useTransform(bgY, (v) => v * 0.06);
+  const decoBgXNeg = useTransform(bgX, (v) => v * -0.04);
+  const decoBgYNeg = useTransform(bgY, (v) => v * -0.04);
+  const decoLetterX = useTransform(fgX, (v) => v * 0.06);
+  const decoRingX = useTransform(fgX, (v) => v * 0.03);
+  const decoLineX = useTransform(fgX, (v) => v * 0.05);
+
   useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+
     const handleMouseMove = (e: MouseEvent) => {
-      if (!sectionRef.current) return;
-      const rect = sectionRef.current.getBoundingClientRect();
+      const rect = el.getBoundingClientRect();
       const cx = e.clientX - (rect.left + rect.width / 2);
       const cy = e.clientY - (rect.top + rect.height / 2);
       mouseX.set(cx);
@@ -44,9 +55,34 @@ export default function HeroSection() {
       rotateX.set(Math.max(-maxTilt, Math.min(maxTilt, cy * 0.05)));
       rotateY.set(Math.max(-maxTilt, Math.min(maxTilt, cx * -0.05)));
     };
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
+
+    const handleMouseLeave = () => {
+      mouseX.set(0);
+      mouseY.set(0);
+      rotateX.set(0);
+      rotateY.set(0);
+    };
+
+    el.addEventListener("mousemove", handleMouseMove);
+    el.addEventListener("mouseleave", handleMouseLeave);
+    return () => {
+      el.removeEventListener("mousemove", handleMouseMove);
+      el.removeEventListener("mouseleave", handleMouseLeave);
+    };
   }, [mouseX, mouseY, rotateX, rotateY]);
+
+  // Reset parallax when scrolled past hero
+  useEffect(() => {
+    const unsub = scrollYProgress.on("change", (v) => {
+      if (v > 0.1) {
+        mouseX.set(0);
+        mouseY.set(0);
+        rotateX.set(0);
+        rotateY.set(0);
+      }
+    });
+    return unsub;
+  }, [scrollYProgress, mouseX, mouseY, rotateX, rotateY]);
 
   return (
     <section
@@ -72,13 +108,13 @@ export default function HeroSection() {
           ))}
         </div>
 
-        {/* Diagonal color blocks - clip-path for clean cut + parallax */}
+        {/* Diagonal color blocks - through bgX/bgY springs */}
         <motion.div
           className="absolute -inset-[15%] pointer-events-none will-change-transform"
           style={{
             clipPath: "polygon(0 0, 65% 0, 0 70%)",
-            x: useTransform(mouseX, (v) => v * 0.06),
-            y: useTransform(mouseY, (v) => v * 0.06),
+            x: decoBgX,
+            y: decoBgY,
           }}
         >
           <div className="w-full h-full bg-accent/[0.20]" />
@@ -87,8 +123,8 @@ export default function HeroSection() {
           className="absolute -inset-[15%] pointer-events-none will-change-transform"
           style={{
             clipPath: "polygon(100% 30%, 100% 100%, 35% 100%)",
-            x: useTransform(mouseX, (v) => v * -0.04),
-            y: useTransform(mouseY, (v) => v * -0.04),
+            x: decoBgXNeg,
+            y: decoBgYNeg,
           }}
         >
           <div className="w-full h-full bg-purple-500/[0.20]" />
@@ -125,7 +161,7 @@ export default function HeroSection() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1.5, delay: 0.5 }}
-        style={{ x: useTransform(fgX, (v) => v * 0.06) }}
+        style={{ x: decoLetterX }}
       >
         <span className="text-[25vw] md:text-[20vw] font-black leading-none text-foreground/[0.03] tracking-tighter">
           A.
@@ -137,7 +173,7 @@ export default function HeroSection() {
         className="absolute top-[15%] right-[10%] w-[200px] h-[200px] md:w-[350px] md:h-[350px] pointer-events-none z-[2] will-change-transform"
         animate={{ rotate: 360 }}
         transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-        style={{ x: useTransform(fgX, (v) => v * 0.03) }}
+        style={{ x: decoRingX }}
       >
         <div className="w-full h-full rounded-full border border-foreground/[0.06]" />
         <div className="absolute inset-4 rounded-full border border-dashed border-accent/20" />
@@ -147,7 +183,7 @@ export default function HeroSection() {
       {/* Diagonal accent line */}
       <motion.div
         className="absolute top-[30%] left-[60%] w-[300px] md:w-[500px] h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent pointer-events-none z-[2] origin-left"
-        style={{ rotate: -25, x: useTransform(fgX, (v) => v * 0.05) }}
+        style={{ rotate: -25, x: decoLineX }}
         initial={{ scaleX: 0, opacity: 0 }}
         animate={{ scaleX: 1, opacity: 1 }}
         transition={{ duration: 1.5, delay: 1 }}
