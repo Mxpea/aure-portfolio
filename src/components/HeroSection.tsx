@@ -56,15 +56,15 @@ export default function HeroSection() {
     >
       {/* ===== BACK LAYER ===== */}
       <motion.div
-        className="absolute inset-0 z-0"
+        className="absolute inset-0 z-0 will-change-transform"
         style={{ x: bgTranslateX, y: bgTranslateY }}
       >
         {/* Marquee text */}
-        <div className="absolute inset-0 overflow-hidden flex flex-col justify-center pointer-events-none select-none opacity-40 -translate-x-[5%] -translate-y-[5%] w-[110%] h-[110%] rotate-[-10deg]">
+        <div className="absolute inset-0 overflow-hidden flex flex-col justify-center pointer-events-none select-none opacity-30 -translate-x-[5%] -translate-y-[5%] w-[110%] h-[110%] rotate-[-10deg]">
           {Array.from({ length: 12 }).map((_, i) => (
             <div
               key={i}
-              className={`w-max flex whitespace-nowrap text-outline text-[60px] md:text-[100px] lg:text-[120px] font-black uppercase leading-[0.85] ${i % 2 === 0 ? "marquee-left" : "marquee-right"}`}
+              className={`w-max flex whitespace-nowrap text-outline text-[60px] md:text-[100px] lg:text-[120px] font-black uppercase leading-[0.85] will-change-transform ${i % 2 === 0 ? 'marquee-left' : 'marquee-right'}`}
             >
               <span>{"AURELITH MXPEA ".repeat(8)}</span>
               <span>{"AURELITH MXPEA ".repeat(8)}</span>
@@ -74,7 +74,7 @@ export default function HeroSection() {
 
         {/* Diagonal color blocks - clip-path for clean cut + parallax */}
         <motion.div
-          className="absolute -inset-[15%] pointer-events-none"
+          className="absolute -inset-[15%] pointer-events-none will-change-transform"
           style={{
             clipPath: "polygon(0 0, 65% 0, 0 70%)",
             x: useTransform(mouseX, (v) => v * 0.06),
@@ -84,7 +84,7 @@ export default function HeroSection() {
           <div className="w-full h-full bg-accent/[0.20]" />
         </motion.div>
         <motion.div
-          className="absolute -inset-[15%] pointer-events-none"
+          className="absolute -inset-[15%] pointer-events-none will-change-transform"
           style={{
             clipPath: "polygon(100% 30%, 100% 100%, 35% 100%)",
             x: useTransform(mouseX, (v) => v * -0.04),
@@ -96,7 +96,7 @@ export default function HeroSection() {
 
         {/* Gradient blobs */}
         <motion.div
-          className="absolute w-[600px] h-[600px] md:w-[1000px] md:h-[1000px] rounded-full opacity-40 blur-[120px] md:blur-[160px]"
+          className="absolute w-[600px] h-[600px] md:w-[800px] md:h-[800px] rounded-full opacity-40 blur-[60px] md:blur-[80px] will-change-transform"
           animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0.5, 0.3] }}
           transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
           style={{
@@ -107,7 +107,7 @@ export default function HeroSection() {
           }}
         />
         <motion.div
-          className="absolute w-[500px] h-[500px] md:w-[800px] md:h-[800px] rounded-full opacity-30 blur-[120px] md:blur-[140px]"
+          className="absolute w-[500px] h-[500px] md:w-[600px] md:h-[600px] rounded-full opacity-30 blur-[60px] md:blur-[80px] will-change-transform"
           animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.4, 0.2] }}
           transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 2 }}
           style={{
@@ -116,7 +116,7 @@ export default function HeroSection() {
             bottom: "5%",
           }}
         />
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay pointer-events-none" />
+        <div className="absolute inset-0 opacity-10 mix-blend-overlay pointer-events-none bg-repeat" style={{ backgroundImage: "url('data:image/svg+xml,%3Csvg viewBox=%220 0 256 256%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noise%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noise)%22/%3E%3C/svg%3E')" }} />
       </motion.div>
 
       {/* ===== BIG DECORATIVE LETTERS - absolute positioned ===== */}
@@ -134,7 +134,7 @@ export default function HeroSection() {
 
       {/* Rotating ring decoration */}
       <motion.div
-        className="absolute top-[15%] right-[10%] w-[200px] h-[200px] md:w-[350px] md:h-[350px] pointer-events-none z-[2]"
+        className="absolute top-[15%] right-[10%] w-[200px] h-[200px] md:w-[350px] md:h-[350px] pointer-events-none z-[2] will-change-transform"
         animate={{ rotate: 360 }}
         transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
         style={{ x: useTransform(fgX, (v) => v * 0.03) }}
@@ -155,7 +155,7 @@ export default function HeroSection() {
 
       {/* ===== FRONT LAYER ===== */}
       <motion.div
-        className="relative z-10 w-full max-w-[1400px] mx-auto px-6 md:px-12 lg:px-16 py-20"
+        className="relative z-10 w-full max-w-[1400px] mx-auto px-6 md:px-12 lg:px-16 py-20 will-change-transform"
         style={{ x: fgTranslateX, y: fgTranslateY }}
       >
         <div className="flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12">

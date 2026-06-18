@@ -112,6 +112,23 @@ body {
   transform: scale(1.06) translateY(-6px);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
 }
+
+/* Blur reveal animation */
+.blur-reveal {
+  animation: blur-reveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes blur-reveal {
+  0% { filter: blur(20px); opacity: 0; transform: scale(0.98); }
+  100% { filter: blur(0); opacity: 1; transform: scale(1); }
+}
+
+.blur-snap-in {
+  animation: blur-snap-in 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes blur-snap-in {
+  0% { filter: blur(12px); opacity: 0.5; }
+  100% { filter: blur(0); opacity: 1; }
+}
 .text-outline {
   color: transparent;
   -webkit-text-stroke: 3px rgba(128, 128, 128, 0.25);

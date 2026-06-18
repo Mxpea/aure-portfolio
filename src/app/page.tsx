@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import dynamic from "next/dynamic";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Dynamic imports for better performance
 const CustomCursor = dynamic(() => import("@/components/CustomCursor"), {
@@ -31,6 +32,9 @@ const ThemeToggle = dynamic(() => import("@/components/ThemeToggle"), {
 const PaginationHandler = dynamic(() => import("@/components/PaginationHandler"), {
   ssr: false,
 });
+const FriendLinksSection = dynamic(() => import("@/components/FriendLinksSection"), {
+  ssr: false,
+});
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
@@ -57,19 +61,22 @@ export default function Home() {
       <ThemeToggle />
 
       {/* Main content */}
-      <div className="relative">
-        {/* Hero section */}
-        <HeroSection />
-
-        {/* Works section */}
-        <WorksSection />
-
-        {/* About section */}
-        <AboutSection />
-
-        {/* Contact section */}
-        <ContactSection />
-      </div>
+      <AnimatePresence>
+        {!isLoading && (
+          <motion.div
+            className="relative"
+            initial={{ filter: "blur(20px)", opacity: 0, scale: 0.98 }}
+            animate={{ filter: "blur(0px)", opacity: 1, scale: 1 }}
+            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+          >
+            <HeroSection />
+            <WorksSection />
+            <AboutSection />
+            <ContactSection />
+            <FriendLinksSection />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }

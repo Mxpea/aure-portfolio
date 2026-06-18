@@ -56,15 +56,89 @@ export async function fetchGitHubUser(username: string): Promise<GitHubUser | nu
   }
 }
 
-// Fetch contribution data from GitHub (approximate using events)
+export async function fetchTopLanguages(username: string, limit = 2): Promise<string[]> {
+  try {
+    const res = await fetch(
+      `https://api.github.com/users/${username}/repos?per_page=100&sort=updated`,
+      { next: { revalidate: 3600 } }
+    );
+    if (!res.ok) throw new Error("Failed to fetch repos");
+    const repos = await res.json();
+
+    const counts: Record<string, number> = {};
+    repos.forEach((repo: { language: string | null }) => {
+      if (repo.language) {
+        counts[repo.language] = (counts[repo.language] || 0) + 1;
+      }
+    });
+
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, limit)
+      .map(([lang]) => lang);
+  } catch (error) {
+    console.error("Error fetching languages:", error);
+    return [];
+  }
+}
+
+// Fetch contribution data from GitHub GraphQL API (accurate)
 export interface ContributionDay {
   date: string;
   count: number;
 }
 
 export async function fetchGitHubContributions(username: string): Promise<ContributionDay[]> {
+  const token = process.env.GITHUB_TOKEN || process.env.NEXT_PUBLIC_GITHUB_TOKEN;
+
+  // If token available, use GraphQL API for accurate data
+  if (token) {
+    try {
+      const res = await fetch("https://api.github.com/graphql", {
+        method: "POST",
+        headers: {
+          Authorization: `bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query: `{
+            user(login: "${username}") {
+              contributionsCollection {
+                contributionCalendar {
+                  weeks {
+                    contributionDays {
+                      date
+                      contributionCount
+                    }
+                  }
+                }
+              }
+            }
+          }`,
+        }),
+        next: { revalidate: 1800 },
+      });
+
+      if (!res.ok) throw new Error("GraphQL request failed");
+      const data = await res.json();
+      const weeks = data.data?.user?.contributionsCollection?.contributionCalendar?.weeks;
+
+      if (weeks) {
+        const days: ContributionDay[] = [];
+        weeks.forEach((week: { contributionDays: { date: string; contributionCount: number }[] }) => {
+          week.contributionDays.forEach((day) => {
+            days.push({ date: day.date, count: day.contributionCount });
+          });
+        });
+        return days;
+      }
+    } catch (error) {
+      console.error("GraphQL contribution fetch failed, falling back to events:", error);
+    }
+  }
+
+  // Fallback: use events API (limited, approximate)
   try {
-    // Use GitHub events API to get recent activity
     const res = await fetch(
       `https://api.github.com/users/${username}/events/public?per_page=100`,
       { next: { revalidate: 1800 } }
@@ -72,34 +146,22 @@ export async function fetchGitHubContributions(username: string): Promise<Contri
     if (!res.ok) throw new Error("Failed to fetch events");
     const events = await res.json();
 
-    // Count contributions by date
     const contributions: Record<string, number> = {};
     const now = new Date();
-    
-    // Initialize last 365 days with 0
+
     for (let i = 0; i < 365; i++) {
       const date = new Date(now);
       date.setDate(date.getDate() - i);
-      const dateStr = date.toISOString().split("T")[0];
-      contributions[dateStr] = 0;
+      contributions[date.toISOString().split("T")[0]] = 0;
     }
 
-    // Count events by date
     events.forEach((event: { type: string; created_at: string }) => {
-      if (
-        event.type === "PushEvent" ||
-        event.type === "CreateEvent" ||
-        event.type === "PullRequestEvent" ||
-        event.type === "IssuesEvent"
-      ) {
+      if (["PushEvent", "CreateEvent", "PullRequestEvent", "IssuesEvent"].includes(event.type)) {
         const dateStr = event.created_at.split("T")[0];
-        if (contributions[dateStr] !== undefined) {
-          contributions[dateStr]++;
-        }
+        if (contributions[dateStr] !== undefined) contributions[dateStr]++;
       }
     });
 
-    // Convert to array
     return Object.entries(contributions)
       .map(([date, count]) => ({ date, count }))
       .sort((a, b) => a.date.localeCompare(b.date));

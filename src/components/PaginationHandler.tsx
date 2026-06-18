@@ -33,6 +33,19 @@ export default function PaginationHandler() {
     accumulated.current = 0;
     cooldownUntil.current = Date.now() + 900;
 
+    // Find target section and apply blur animation
+    const sections = Array.from(document.querySelectorAll("section[id]")) as HTMLElement[];
+    let targetSection: HTMLElement | null = null;
+    for (const s of sections) {
+      if (Math.abs(s.offsetTop - target) < 2) { targetSection = s; break; }
+    }
+    if (targetSection) {
+      targetSection.classList.remove("blur-snap-in");
+      void targetSection.offsetWidth; // force reflow
+      targetSection.classList.add("blur-snap-in");
+      setTimeout(() => targetSection?.classList.remove("blur-snap-in"), 1600);
+    }
+
     animRef.current = animate(window.scrollY, target, {
       duration: 0.5,
       ease: [0.16, 1, 0.3, 1],
@@ -61,12 +74,33 @@ export default function PaginationHandler() {
 
     const handleWheel = (e: WheelEvent) => {
       if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
-      e.preventDefault();
 
       if (Date.now() < cooldownUntil.current) {
+        e.preventDefault();
         accumulated.current = 0;
         return;
       }
+
+      // Check if current section has scrollable internal content
+      const sections = getSections();
+      const idx = getCurrentIndex();
+      const sec = sections[idx];
+      if (sec) {
+        const scrollable = sec.querySelector("[data-scroll-inner]") as HTMLElement | null;
+        if (scrollable) {
+          const atTop = scrollable.scrollTop <= 0;
+          const atBottom = scrollable.scrollTop + scrollable.clientHeight >= scrollable.scrollHeight - 2;
+          const goingDown = e.deltaY > 0;
+          const goingUp = e.deltaY < 0;
+
+          // Allow internal scroll if not at boundary
+          if ((goingDown && !atBottom) || (goingUp && !atTop)) {
+            return; // don't preventDefault, let native scroll work
+          }
+        }
+      }
+
+      e.preventDefault();
 
       accumulated.current += e.deltaY;
 

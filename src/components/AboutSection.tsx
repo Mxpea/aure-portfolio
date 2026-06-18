@@ -2,7 +2,7 @@
 
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
-import { fetchGitHubContributions, fetchGitHubUser, type ContributionDay, type GitHubUser } from "@/lib/github";
+import { fetchGitHubContributions, fetchGitHubUser, fetchTopLanguages, type ContributionDay, type GitHubUser } from "@/lib/github";
 
 function ContributionGraph({ contributions }: { contributions: ContributionDay[] }) {
   const [hoveredDay, setHoveredDay] = useState<ContributionDay | null>(null);
@@ -21,25 +21,33 @@ function ContributionGraph({ contributions }: { contributions: ContributionDay[]
     return "bg-accent";
   };
 
+  const weekCount = Math.min(weeks.length, 52);
+  const displayWeeks = weeks.slice(-weekCount);
+
   return (
     <div className="relative">
-      <div className="flex gap-[2px] md:gap-[3px] overflow-x-hidden hover:overflow-x-auto pb-4 custom-scrollbar">
-        {weeks.slice(-20).map((week, weekIndex) => (
-          <div key={weekIndex} className="flex flex-col gap-[2px] md:gap-[3px]">
-            {week.map((day, dayIndex) => (
-              <motion.div
-                key={day.date}
-                className={`w-2 h-2 md:w-2.5 md:h-2.5 rounded-sm ${getColor(day.count)} cursor-pointer`}
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.2, delay: weekIndex * 0.02 + dayIndex * 0.01 }}
-                onMouseEnter={() => setHoveredDay(day)}
-                onMouseLeave={() => setHoveredDay(null)}
-                whileHover={{ scale: 1.5 }}
-              />
-            ))}
-          </div>
-        ))}
+      <div
+        className="grid gap-[2px] md:gap-[3px] pb-4"
+        style={{
+          gridTemplateRows: "repeat(7, 1fr)",
+          gridAutoFlow: "column",
+          gridAutoColumns: "1fr",
+        }}
+      >
+        {displayWeeks.map((week) =>
+          week.map((day, dayIndex) => (
+            <motion.div
+              key={day.date}
+              className={`aspect-square rounded-sm ${getColor(day.count)} cursor-pointer`}
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.2, delay: dayIndex * 0.005 }}
+              onMouseEnter={() => setHoveredDay(day)}
+              onMouseLeave={() => setHoveredDay(null)}
+              whileHover={{ scale: 1.5 }}
+            />
+          ))
+        )}
       </div>
 
       {/* Tooltip */}
@@ -118,21 +126,24 @@ function GitHubStatsCard({ user }: { user: GitHubUser | null }) {
 export default function AboutSection() {
   const [contributions, setContributions] = useState<ContributionDay[]>([]);
   const [user, setUser] = useState<GitHubUser | null>(null);
+  const [topLangs, setTopLangs] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
       fetchGitHubContributions("Mxpea"),
       fetchGitHubUser("Mxpea"),
-    ]).then(([contribs, userData]) => {
+      fetchTopLanguages("Mxpea"),
+    ]).then(([contribs, userData, langs]) => {
       setContributions(contribs);
       setUser(userData);
+      setTopLangs(langs);
       setLoading(false);
     });
   }, []);
 
   return (
-    <section className="relative min-h-screen snap-start flex flex-col justify-center py-24 md:py-32 px-4 md:px-8" id="about">
+    <section className="relative min-h-screen snap-start flex flex-col py-24 md:py-32 px-4 md:px-8" id="about">
       {/* Background accent */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-accent/5 to-transparent pointer-events-none" />
 
@@ -158,8 +169,8 @@ export default function AboutSection() {
         </motion.h2>
       </div>
 
-      {/* Content */}
-      <div className="relative z-10 max-w-[1200px] mx-auto px-4 md:px-8">
+      {/* Content - scrollable if exceeds viewport */}
+      <div data-scroll-inner className="relative z-10 max-w-[1200px] mx-auto px-4 md:px-8 overflow-y-auto flex-1 max-h-[calc(100vh-200px)]">
         {/* Intro text */}
         <motion.div
           className="text-center mb-12 md:mb-16"
@@ -218,7 +229,7 @@ export default function AboutSection() {
                     </svg>
                   ), 
                   label: "主要语言", 
-                  value: "TypeScript, Python" 
+                  value: topLangs.length > 0 ? topLangs.join(", ") : "加载中..." 
                 },
                 { 
                   icon: (
