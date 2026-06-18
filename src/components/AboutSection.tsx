@@ -143,7 +143,7 @@ export default function AboutSection() {
   }, []);
 
   return (
-    <section className="relative min-h-screen snap-start flex flex-col py-24 md:py-32 px-4 md:px-8" id="about">
+    <section className="relative min-h-screen flex flex-col py-24 md:py-32 px-4 md:px-8" id="about">
       {/* Background accent */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-accent/5 to-transparent pointer-events-none" />
 

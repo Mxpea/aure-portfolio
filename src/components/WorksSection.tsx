@@ -154,7 +154,7 @@ export default function WorksSection() {
   const row2 = repos.slice(mid);
 
   return (
-    <section className="relative min-h-screen snap-start flex flex-col justify-center py-20 md:py-28" id="works">
+    <section className="relative min-h-screen flex flex-col justify-center py-20 md:py-28" id="works">
       <div className="text-center mb-12 md:mb-16 px-4">
         <motion.span
           className="text-xs md:text-sm tracking-[0.2em] md:tracking-[0.3em] text-muted-foreground uppercase"

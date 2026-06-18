@@ -42,7 +42,7 @@ export default function FriendLinksSection() {
   }, []);
 
   return (
-    <section className="relative min-h-screen snap-start flex flex-col justify-center py-24 md:py-32 px-4 md:px-8" id="links">
+    <section className="relative min-h-screen flex flex-col justify-center py-24 md:py-32 px-4 md:px-8" id="links">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-accent/5 to-transparent pointer-events-none" />
 
       <div className="relative z-10 text-center mb-16 md:mb-20">

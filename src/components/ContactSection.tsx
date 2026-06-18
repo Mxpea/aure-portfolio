@@ -57,7 +57,7 @@ export default function ContactSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-screen snap-start flex flex-col items-center justify-center py-24 md:py-32 px-4 md:px-8"
+      className="relative min-h-screen flex flex-col items-center justify-center py-24 md:py-32 px-4 md:px-8"
       id="contact"
     >
       {/* Background effects */}
