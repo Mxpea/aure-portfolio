@@ -1,26 +1,270 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Light theme */
+  --background: #fafafa;
+  --foreground: #09090b;
+  --card: rgba(255, 255, 255, 0.6);
+  --card-foreground: #09090b;
+  --primary: #18181b;
+  --primary-foreground: #ffffff;
+  --secondary: #f4f4f5;
+  --secondary-foreground: #18181b;
+  --muted: #e8ecf0;
+  --muted-foreground: #71717a;
+  --accent: #2563eb;
+  --accent-foreground: #ffffff;
+  --border: #e4e4e7;
+  --ring: #18181b;
+  --glass: rgba(255, 255, 255, 0.4);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  --glass-shadow: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] {
+  /* Dark theme */
+  --background: #09090b;
+  --foreground: #fafafa;
+  --card: rgba(24, 24, 27, 0.6);
+  --card-foreground: #fafafa;
+  --primary: #fafafa;
+  --primary-foreground: #18181b;
+  --secondary: #27272a;
+  --secondary-foreground: #fafafa;
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
+  --accent: #3b82f6;
+  --accent-foreground: #ffffff;
+  --border: #27272a;
+  --ring: #d4d4d8;
+  --glass: rgba(24, 24, 27, 0.4);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: rgba(0, 0, 0, 0.2);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --color-glass: var(--glass);
+  --color-glass-border: var(--glass-border);
+  --color-glass-shadow: var(--glass-shadow);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+html {
+  scroll-behavior: smooth;
+}
+
+@media (pointer: coarse) {
+  html {
+    scroll-snap-type: y mandatory;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* Marquee Animations */
+@keyframes scroll-left {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes scroll-right {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+.marquee-left {
+  animation: scroll-left 150s linear infinite;
+}
+.marquee-right {
+  animation: scroll-right 150s linear infinite;
+}
+
+/* Card marquee - JS controlled */
+.marquee-pause-container:hover .marquee-card-left,
+.marquee-pause-container:hover .marquee-card-right {
+  animation-play-state: paused;
+}
+
+/* Repo card hover animation */
+.repo-card {
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s ease;
+}
+.repo-card:hover {
+  transform: scale(1.06) translateY(-6px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+.text-outline {
+  color: transparent;
+  -webkit-text-stroke: 3px rgba(128, 128, 128, 0.25);
+}
+[data-theme="dark"] .text-outline {
+  -webkit-text-stroke: 3px rgba(255, 255, 255, 0.15);
+}
+
+/* Rainbow text animation - seamless loop with 2x repeat */
+.rainbow-flow {
+  background: linear-gradient(
+    90deg,
+    #f0a0a0,
+    #f0c49a,
+    #f0dfa0,
+    #a8d8a0,
+    #9ad0f0,
+    #b8a8e0,
+    #e0b0c8,
+    #f0a0a0,
+    #f0c49a,
+    #f0dfa0,
+    #a8d8a0,
+    #9ad0f0,
+    #b8a8e0,
+    #e0b0c8,
+    #f0a0a0
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: rainbow-shift 4s linear infinite;
+}
+@keyframes rainbow-shift {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+/* Volumetric glow - applied to wrapper */
+.vol-glow::before,
+.vol-glow::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  font-weight: 900;
+  pointer-events: none;
+}
+.vol-glow::before {
+  color: #f0a0a0;
+  filter: blur(40px);
+  opacity: 0.15;
+  animation: glow-pulse 4s ease-in-out infinite;
+}
+.vol-glow::after {
+  color: #b8a8e0;
+  filter: blur(60px);
+  opacity: 0.12;
+  animation: glow-pulse 4s ease-in-out infinite 2s;
+}
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.1; transform: scale(1); }
+  50% { opacity: 0.18; transform: scale(1.03); }
+}
+
+/* Light rays */
+.light-rays {
+  position: absolute;
+  inset: -20%;
+  background: conic-gradient(
+    from 0deg at 50% 50%,
+    transparent 0deg,
+    rgba(240, 160, 160, 0.04) 30deg,
+    transparent 60deg,
+    rgba(184, 168, 224, 0.04) 120deg,
+    transparent 150deg,
+    rgba(154, 208, 240, 0.04) 210deg,
+    transparent 240deg,
+    rgba(240, 223, 160, 0.04) 300deg,
+    transparent 330deg,
+    rgba(240, 160, 160, 0.04) 360deg
+  );
+  filter: blur(30px);
+  animation: rays-rotate 20s linear infinite;
+  pointer-events: none;
+}
+@keyframes rays-rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Glassmorphism utility */
+.glass {
+  background: var(--glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px var(--glass-shadow);
+}
+
+.glass-strong {
+  background: var(--glass);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px var(--glass-shadow);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+
+/* Custom horizontal scrollbar for graph */
+.custom-scrollbar::-webkit-scrollbar {
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  border-radius: 3px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+
+/* Selection */
+::selection {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+/* Smooth transitions for theme switching */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Exclude animations from transition */
+.no-transition {
+  transition: none !important;
 }
