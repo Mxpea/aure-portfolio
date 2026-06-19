@@ -4,6 +4,7 @@ export async function GET() {
   const token = process.env.GITHUB_TOKEN;
   
   if (!token) {
+    console.error("GITHUB_TOKEN not found, env keys:", Object.keys(process.env).filter(k => k.includes("GIT") || k.includes("TOKEN") || k.includes("SECRET")));
     return NextResponse.json(
       { error: "no_token", message: "GITHUB_TOKEN not set" },
       { status: 500 }
