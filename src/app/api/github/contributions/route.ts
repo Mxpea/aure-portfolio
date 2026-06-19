@@ -10,6 +10,7 @@ export async function GET() {
         headers: {
           Authorization: `bearer ${token}`,
           "Content-Type": "application/json",
+          "User-Agent": "aure-portfolio",
         },
         body: JSON.stringify({
           query: `{
@@ -51,6 +52,7 @@ export async function GET() {
   try {
     const headers: Record<string, string> = {
       Accept: "application/vnd.github.v3+json",
+      "User-Agent": "aure-portfolio",
     };
     if (token) headers.Authorization = `bearer ${token}`;
 

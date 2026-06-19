@@ -13,6 +13,7 @@ export async function GET() {
         headers: {
           Accept: "application/vnd.github.v3+json",
           Authorization: `bearer ${token}`,
+          "User-Agent": "aure-portfolio",
         },
       }
     );
