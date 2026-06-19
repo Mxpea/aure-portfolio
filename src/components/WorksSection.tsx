@@ -90,16 +90,26 @@ function MarqueeRow({ repos, direction }: { repos: GitHubRepo[]; direction: "lef
   const rafRef = useRef<number>(0);
   const xRef = useRef(0);
   const velRef = useRef(1);
-  const baseRef = useRef(0);
   const isHoveredRef = useRef(false);
 
   useEffect(() => {
     const el = innerRef.current;
-    if (!el) return;
+    const container = containerRef.current;
+    if (!el || !container) return;
 
-    const half = el.scrollWidth / 2;
-    baseRef.current = half;
     const speed = direction === "left" ? 0.4 : -0.4;
+
+    // Measure exact repeat length from the first set of cards
+    const cards = Array.from(el.children) as HTMLElement[];
+    const setCount = cards.length / 2;
+    let repeatLen = 0;
+    for (let i = 0; i < setCount; i++) {
+      repeatLen += cards[i].offsetWidth;
+      if (i < setCount - 1) {
+        const gap = cards[i + 1].offsetLeft - cards[i].offsetLeft - cards[i].offsetWidth;
+        repeatLen += gap;
+      }
+    }
 
     const tick = () => {
       const targetVel = isHoveredRef.current ? 0 : 1;
@@ -107,24 +117,23 @@ function MarqueeRow({ repos, direction }: { repos: GitHubRepo[]; direction: "lef
 
       if (velRef.current > 0.005) {
         xRef.current -= speed * velRef.current;
-        if (direction === "left" && xRef.current <= -half) xRef.current += half;
-        if (direction === "right" && xRef.current >= 0) xRef.current -= half;
+        // Wrap using modulo with exact repeat length
+        xRef.current = ((xRef.current % repeatLen) + repeatLen) % repeatLen - repeatLen;
         el.style.transform = `translateX(${xRef.current}px)`;
       }
       rafRef.current = requestAnimationFrame(tick);
     };
     rafRef.current = requestAnimationFrame(tick);
 
-    const container = containerRef.current;
     const enter = () => { isHoveredRef.current = true; };
     const leave = () => { isHoveredRef.current = false; };
-    container?.addEventListener("mouseenter", enter);
-    container?.addEventListener("mouseleave", leave);
+    container.addEventListener("mouseenter", enter);
+    container.addEventListener("mouseleave", leave);
 
     return () => {
       cancelAnimationFrame(rafRef.current);
-      container?.removeEventListener("mouseenter", enter);
-      container?.removeEventListener("mouseleave", leave);
+      container.removeEventListener("mouseenter", enter);
+      container.removeEventListener("mouseleave", leave);
     };
   }, [direction]);
 

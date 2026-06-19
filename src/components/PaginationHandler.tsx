@@ -87,15 +87,26 @@ export default function PaginationHandler() {
       const sec = sections[idx];
       if (sec) {
         const scrollable = sec.querySelector("[data-scroll-inner]") as HTMLElement | null;
+        const secBottom = sec.offsetTop + sec.offsetHeight;
+        const viewBottom = window.scrollY + window.innerHeight;
+        const secExceedsViewport = sec.offsetHeight > window.innerHeight + 10;
+
         if (scrollable) {
           const atTop = scrollable.scrollTop <= 0;
           const atBottom = scrollable.scrollTop + scrollable.clientHeight >= scrollable.scrollHeight - 2;
           const goingDown = e.deltaY > 0;
           const goingUp = e.deltaY < 0;
-
-          // Allow internal scroll if not at boundary
           if ((goingDown && !atBottom) || (goingUp && !atTop)) {
-            return; // don't preventDefault, let native scroll work
+            return;
+          }
+        } else if (secExceedsViewport) {
+          // Section content exceeds viewport - allow native scroll within it
+          const atTop = window.scrollY <= sec.offsetTop + 2;
+          const atBottom = viewBottom >= secBottom - 2;
+          const goingDown = e.deltaY > 0;
+          const goingUp = e.deltaY < 0;
+          if ((goingDown && !atBottom) || (goingUp && !atTop)) {
+            return;
           }
         }
       }
@@ -110,9 +121,10 @@ export default function PaginationHandler() {
       if (Math.abs(accumulated.current) >= THRESHOLD) {
         const dir = accumulated.current > 0 ? 1 : -1;
         const sections = getSections();
+        if (sections.length === 0) return;
         const idx = getCurrentIndex();
         const next = Math.max(0, Math.min(idx + dir, sections.length - 1));
-        snapTo(sections[next].offsetTop);
+        if (sections[next]) snapTo(sections[next].offsetTop);
       }
     };
 
