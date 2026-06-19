@@ -1,15 +1,17 @@
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const token = process.env.GITHUB_TOKEN;
+  const token = process.env.GITHUB_TOKEN || process.env.NEXT_PUBLIC_GITHUB_TOKEN;
   
   if (!token) {
-    console.error("GITHUB_TOKEN not found, env keys:", Object.keys(process.env).filter(k => k.includes("GIT") || k.includes("TOKEN") || k.includes("SECRET")));
+    console.error("GITHUB_TOKEN not found");
     return NextResponse.json(
       { error: "no_token", message: "GITHUB_TOKEN not set" },
       { status: 500 }
     );
   }
+
+  console.log("GITHUB_TOKEN found, length:", token.length, "starts with:", token.substring(0, 4));
 
   try {
     const res = await fetch(
@@ -24,6 +26,7 @@ export async function GET() {
 
     if (!res.ok) {
       const text = await res.text();
+      console.error("GitHub API error:", res.status, text);
       return NextResponse.json(
         { error: `github_${res.status}`, message: text },
         { status: res.status }
