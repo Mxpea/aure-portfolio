@@ -24,7 +24,7 @@ const socialLinks: SocialLink[] = [
   },
   {
     name: "Bilibili",
-    url: "https://space.bilibili.com/",
+    url: "https://b23.tv/PF7182s",
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="md:w-6 md:h-6">
         <path
