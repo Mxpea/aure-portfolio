@@ -85,63 +85,18 @@ function RepoCard({ repo }: { repo: GitHubRepo }) {
 }
 
 function MarqueeRow({ repos, direction }: { repos: GitHubRepo[]; direction: "left" | "right" }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const innerRef = useRef<HTMLDivElement>(null);
-  const rafRef = useRef<number>(0);
-  const xRef = useRef(0);
-  const velRef = useRef(1);
-  const isHoveredRef = useRef(false);
-
-  useEffect(() => {
-    const el = innerRef.current;
-    const container = containerRef.current;
-    if (!el || !container) return;
-
-    const speed = direction === "left" ? 0.4 : -0.4;
-
-    // Measure exact repeat length from the first set of cards
-    const cards = Array.from(el.children) as HTMLElement[];
-    const setCount = cards.length / 2;
-    let repeatLen = 0;
-    for (let i = 0; i < setCount; i++) {
-      repeatLen += cards[i].offsetWidth;
-      if (i < setCount - 1) {
-        const gap = cards[i + 1].offsetLeft - cards[i].offsetLeft - cards[i].offsetWidth;
-        repeatLen += gap;
-      }
-    }
-
-    const tick = () => {
-      const targetVel = isHoveredRef.current ? 0 : 1;
-      velRef.current += (targetVel - velRef.current) * 0.04;
-
-      if (velRef.current > 0.005) {
-        xRef.current -= speed * velRef.current;
-        // Wrap using modulo with exact repeat length
-        xRef.current = ((xRef.current % repeatLen) + repeatLen) % repeatLen - repeatLen;
-        el.style.transform = `translateX(${xRef.current}px)`;
-      }
-      rafRef.current = requestAnimationFrame(tick);
-    };
-    rafRef.current = requestAnimationFrame(tick);
-
-    const enter = () => { isHoveredRef.current = true; };
-    const leave = () => { isHoveredRef.current = false; };
-    container.addEventListener("mouseenter", enter);
-    container.addEventListener("mouseleave", leave);
-
-    return () => {
-      cancelAnimationFrame(rafRef.current);
-      container.removeEventListener("mouseenter", enter);
-      container.removeEventListener("mouseleave", leave);
-    };
-  }, [direction]);
+  const animClass = direction === "left" ? "marquee-card-left" : "marquee-card-right";
+  // 3 sets: extra padding at start and end so seam is off-screen
+  const tripled = [...repos, ...repos, ...repos];
 
   return (
-    <div ref={containerRef} className="overflow-hidden py-3">
-      <div ref={innerRef} className="w-max flex gap-4 md:gap-6" style={{ willChange: "transform" }}>
-        {repos.map((repo) => <RepoCard key={repo.id} repo={repo} />)}
-        {repos.map((repo) => <RepoCard key={`dup-${repo.id}`} repo={repo} />)}
+    <div className="marquee-pause-container overflow-hidden py-3">
+      <div className={`w-max flex ${animClass}`}>
+        {tripled.map((repo, i) => (
+          <div key={`${repo.id}-${i}`} className="pr-4 md:pr-6">
+            <RepoCard repo={repo} />
+          </div>
+        ))}
       </div>
     </div>
   );
