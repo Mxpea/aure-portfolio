@@ -128,18 +128,24 @@ export default function AboutSection() {
   const [user, setUser] = useState<GitHubUser | null>(null);
   const [topLangs, setTopLangs] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     Promise.all([
       fetchGitHubContributions("Mxpea"),
       fetchGitHubUser("Mxpea"),
       fetchTopLanguages("Mxpea"),
-    ]).then(([contribs, userData, langs]) => {
-      setContributions(contribs);
-      setUser(userData);
-      setTopLangs(langs);
-      setLoading(false);
-    });
+    ])
+      .then(([contribs, userData, langs]) => {
+        setContributions(contribs);
+        setUser(userData);
+        setTopLangs(langs);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError(true);
+        setLoading(false);
+      });
   }, []);
 
   return (
@@ -200,6 +206,10 @@ export default function AboutSection() {
           </div>
           {loading ? (
             <div className="h-16 bg-muted/20 rounded animate-pulse" />
+          ) : error ? (
+            <div className="text-sm text-muted-foreground">
+              GitHub 数据加载失败，请稍后再试
+            </div>
           ) : contributions.length > 0 ? (
             <ContributionGraph contributions={contributions} />
           ) : (

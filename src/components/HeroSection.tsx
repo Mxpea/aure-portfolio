@@ -4,7 +4,7 @@ import { motion, useScroll, useTransform, useMotionValue, useSpring, animate } f
 import Image from "next/image";
 import { useRef, useEffect, useState, useCallback } from "react";
 
-const portraits = ["/aure.png", "/aure2.png"];
+const portraits = ["/aure.webp", "/aure2.webp"];
 
 export default function HeroSection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -135,7 +135,12 @@ export default function HeroSection() {
         style={{ x: bgTranslateX, y: bgTranslateY }}
       >
         {/* Marquee text */}
-        <div className="absolute inset-0 overflow-hidden flex flex-col justify-center pointer-events-none select-none opacity-30 -translate-x-[5%] -translate-y-[5%] w-[110%] h-[110%] rotate-[-10deg]">
+        <motion.div
+          className="absolute inset-0 overflow-hidden flex flex-col justify-center pointer-events-none select-none opacity-30 -translate-x-[5%] -translate-y-[5%] w-[110%] h-[110%] rotate-[-10deg]"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.3 }}
+          transition={{ duration: 2, delay: 0.5 }}
+        >
           {Array.from({ length: 12 }).map((_, i) => (
             <div
               key={i}
@@ -145,7 +150,7 @@ export default function HeroSection() {
               <span>{"AURELITH MXPEA ".repeat(8)}</span>
             </div>
           ))}
-        </div>
+        </motion.div>
 
         {/* Diagonal color blocks - through bgX/bgY springs */}
         <motion.div
@@ -155,6 +160,9 @@ export default function HeroSection() {
             x: decoBgX,
             y: decoBgY,
           }}
+          initial={{ x: "-100%", y: "-100%", opacity: 0 }}
+          animate={{ x: 0, y: 0, opacity: 1 }}
+          transition={{ duration: 1.2, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
         >
           <div className="w-full h-full bg-accent/[0.20]" />
         </motion.div>
@@ -165,6 +173,9 @@ export default function HeroSection() {
             x: decoBgXNeg,
             y: decoBgYNeg,
           }}
+          initial={{ x: "100%", y: "100%", opacity: 0 }}
+          animate={{ x: 0, y: 0, opacity: 1 }}
+          transition={{ duration: 1.2, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
         >
           <div className="w-full h-full bg-purple-500/[0.20]" />
         </motion.div>
@@ -172,8 +183,9 @@ export default function HeroSection() {
         {/* Gradient blobs */}
         <motion.div
           className="absolute w-[600px] h-[600px] md:w-[800px] md:h-[800px] rounded-full opacity-40 blur-[60px] md:blur-[80px] will-change-transform"
-          animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0.5, 0.3] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 0.4, scale: 1 }}
+          transition={{ duration: 2, delay: 0.6, ease: "easeOut" }}
           style={{
             background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
             left: "15%",
@@ -183,15 +195,22 @@ export default function HeroSection() {
         />
         <motion.div
           className="absolute w-[500px] h-[500px] md:w-[600px] md:h-[600px] rounded-full opacity-30 blur-[60px] md:blur-[80px] will-change-transform"
-          animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.4, 0.2] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 0.3, scale: 1 }}
+          transition={{ duration: 2, delay: 0.8, ease: "easeOut" }}
           style={{
             background: "radial-gradient(circle, #8b5cf6 0%, transparent 70%)",
             right: "0%",
             bottom: "5%",
           }}
         />
-        <div className="absolute inset-0 opacity-10 mix-blend-overlay pointer-events-none bg-repeat" style={{ backgroundImage: "url('data:image/svg+xml,%3Csvg viewBox=%220 0 256 256%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noise%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noise)%22/%3E%3C/svg%3E')" }} />
+        <motion.div
+          className="absolute inset-0 opacity-10 mix-blend-overlay pointer-events-none bg-repeat"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.1 }}
+          transition={{ duration: 2, delay: 1 }}
+          style={{ backgroundImage: "url('data:image/svg+xml,%3Csvg viewBox=%220 0 256 256%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noise%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noise)%22/%3E%3C/svg%3E')" }}
+        />
       </motion.div>
 
       {/* ===== BIG DECORATIVE LETTERS - absolute positioned ===== */}
@@ -404,7 +423,7 @@ export default function HeroSection() {
               style={{ rotateX, rotateY, transformStyle: "preserve-3d", perspective: 1000 }}
             >
               <motion.div
-                className="absolute inset-0 bg-accent/25 blur-[100px] rounded-full scale-90"
+                className="absolute inset-0 bg-accent/25 blur-[100px] rounded-full scale-90 pointer-events-none"
                 animate={{ opacity: [0.4, 0.7, 0.4], scale: [0.8, 1.1, 0.8] }}
                 transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
               />
@@ -433,17 +452,17 @@ export default function HeroSection() {
 
               {/* Floating accent dots */}
               <motion.div
-                className="absolute -top-6 -right-6 w-3 h-3 rounded-full bg-accent/40"
+                className="absolute -top-6 -right-6 w-3 h-3 rounded-full bg-accent/40 pointer-events-none"
                 animate={{ y: [-10, 10, -10], x: [-5, 5, -5] }}
                 transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
               />
               <motion.div
-                className="absolute top-[30%] -left-8 w-2 h-2 rounded-full bg-accent/30"
+                className="absolute top-[30%] -left-8 w-2 h-2 rounded-full bg-accent/30 pointer-events-none"
                 animate={{ y: [8, -8, 8] }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }}
               />
               <motion.div
-                className="absolute -bottom-6 left-[20%] w-4 h-4 rounded-full border border-accent/20"
+                className="absolute -bottom-6 left-[20%] w-4 h-4 rounded-full border border-accent/20 pointer-events-none"
                 animate={{ rotate: 360 }}
                 transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
               />

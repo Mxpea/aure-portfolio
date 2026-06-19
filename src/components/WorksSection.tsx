@@ -105,12 +105,18 @@ function MarqueeRow({ repos, direction }: { repos: GitHubRepo[]; direction: "lef
 export default function WorksSection() {
   const [repos, setRepos] = useState<GitHubRepo[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
-    fetchGitHubRepos("Mxpea").then((data) => {
-      setRepos(data);
-      setLoading(false);
-    });
+    fetchGitHubRepos("Mxpea")
+      .then((data) => {
+        setRepos(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError(true);
+        setLoading(false);
+      });
   }, []);
 
   const mid = Math.ceil(repos.length / 2);
@@ -158,6 +164,18 @@ export default function WorksSection() {
               ))}
             </div>
           ))}
+        </div>
+      ) : error ? (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground mb-2">GitHub 数据加载失败</p>
+          <a
+            href="https://github.com/Mxpea"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-accent hover:underline"
+          >
+            前往 GitHub 查看 →
+          </a>
         </div>
       ) : repos.length > 0 ? (
         <div className="space-y-3">
