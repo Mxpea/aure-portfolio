@@ -137,13 +137,17 @@ export default function PaginationHandler() {
       if (["ArrowDown", "PageDown", "Space"].includes(e.code)) {
         e.preventDefault();
         const s = getSections();
+        if (s.length === 0) return;
         const i = getCurrentIndex();
-        snapTo(s[Math.min(i + 1, s.length - 1)].offsetTop);
+        const next = s[Math.min(i + 1, s.length - 1)];
+        if (next) snapTo(next.offsetTop);
       } else if (["ArrowUp", "PageUp"].includes(e.code)) {
         e.preventDefault();
         const s = getSections();
+        if (s.length === 0) return;
         const i = getCurrentIndex();
-        snapTo(s[Math.max(i - 1, 0)].offsetTop);
+        const prev = s[Math.max(i - 1, 0)];
+        if (prev) snapTo(prev.offsetTop);
       }
     };
 
