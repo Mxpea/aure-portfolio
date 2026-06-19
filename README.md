@@ -75,7 +75,3 @@ npm run build
 ```
 
 或连接 GitHub 仓库自动部署。
-
-## License
-
-MIT
