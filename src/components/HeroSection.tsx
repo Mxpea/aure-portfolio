@@ -1,11 +1,16 @@
 "use client";
 
-import { motion, useScroll, useTransform, useMotionValue, useSpring } from "framer-motion";
+import { motion, useScroll, useTransform, useMotionValue, useSpring, animate } from "framer-motion";
 import Image from "next/image";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
+
+const portraits = ["/aure.png", "/aure2.png"];
 
 export default function HeroSection() {
   const sectionRef = useRef<HTMLElement>(null);
+  const [currentPortrait, setCurrentPortrait] = useState(0);
+  const [isFlipping, setIsFlipping] = useState(false);
+  const flipRotation = useMotionValue(0);
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -26,6 +31,40 @@ export default function HeroSection() {
 
   const rotateX = useSpring(useMotionValue(0), { damping: 30, stiffness: 80 });
   const rotateY = useSpring(useMotionValue(0), { damping: 30, stiffness: 80 });
+  const currentPortraitRef = useRef(0);
+  const hasSwitchedRef = useRef(false);
+  const rotationOffset = useRef(0);
+
+  const handlePortraitClick = useCallback(() => {
+    if (isFlipping) return;
+    setIsFlipping(true);
+    hasSwitchedRef.current = false;
+    rotationOffset.current = 0;
+
+    // Animate 180 degree Y rotation with overshoot bounce
+    animate(flipRotation, 180, {
+      duration: 0.8,
+      ease: [0.34, 1.56, 0.64, 1],
+      onUpdate: (v) => {
+        // Switch image at 90 degrees (side view, nearly invisible)
+        if (v >= 90 && !hasSwitchedRef.current) {
+          hasSwitchedRef.current = true;
+          const next = (currentPortraitRef.current + 1) % portraits.length;
+          currentPortraitRef.current = next;
+          setCurrentPortrait(next);
+          // New image starts at -180 so it arrives at 0 when animation hits 180
+          rotationOffset.current = -180;
+        }
+        // Apply combined rotation: animation value + offset
+        flipRotation.set(v + rotationOffset.current);
+      },
+      onComplete: () => {
+        flipRotation.set(0);
+        rotationOffset.current = 0;
+        setIsFlipping(false);
+      },
+    });
+  }, [isFlipping, flipRotation]);
 
   const bgTranslateX = useTransform(bgX, (v) => v * 0.02);
   const bgTranslateY = useTransform(bgY, (v) => v * 0.02);
@@ -371,14 +410,19 @@ export default function HeroSection() {
               />
 
               <motion.div
-                className="relative w-[320px] h-[453px] md:w-[450px] md:h-[637px] lg:w-[550px] lg:h-[779px] xl:w-[620px] xl:h-[878px]"
+                className="relative w-[320px] h-[453px] md:w-[450px] md:h-[637px] lg:w-[550px] lg:h-[779px] xl:w-[620px] xl:h-[878px] cursor-pointer select-none"
                 initial={{ opacity: 0, scale: 0.85, y: 50 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ duration: 1.2, delay: 0.4, type: "spring", stiffness: 80 }}
-                whileHover={{ scale: 1.03, transition: { duration: 0.5 } }}
+                onClick={handlePortraitClick}
+                onMouseDown={(e) => e.preventDefault()}
+                style={{
+                  rotateY: flipRotation,
+                  transformStyle: "preserve-3d",
+                }}
               >
                 <Image
-                  src="/aure.png"
+                  src={portraits[currentPortrait]}
                   alt="Aurelith Portrait"
                   fill
                   className="object-contain drop-shadow-[0_30px_60px_rgba(0,0,0,0.6)]"
