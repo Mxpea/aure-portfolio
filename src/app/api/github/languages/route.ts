@@ -1,13 +1,27 @@
 import { NextResponse } from "next/server";
-import { cachedFetch } from "@/lib/cache";
 
 export async function GET() {
-  try {
-    const repos = await cachedFetch(
-      "https://api.github.com/users/Mxpea/repos?per_page=100&sort=updated",
-      3600000
-    ) as { language: string | null }[];
+  const token = process.env.GITHUB_TOKEN;
+  if (!token) {
+    return NextResponse.json([], { status: 500 });
+  }
 
+  try {
+    const res = await fetch(
+      "https://api.github.com/users/Mxpea/repos?per_page=100&sort=updated",
+      {
+        headers: {
+          Accept: "application/vnd.github.v3+json",
+          Authorization: `bearer ${token}`,
+        },
+      }
+    );
+
+    if (!res.ok) {
+      return NextResponse.json([], { status: res.status });
+    }
+
+    const repos = (await res.json()) as { language: string | null }[];
     const counts: Record<string, number> = {};
     repos.forEach((repo) => {
       if (repo.language) counts[repo.language] = (counts[repo.language] || 0) + 1;
@@ -19,8 +33,7 @@ export async function GET() {
       .map(([lang]) => lang);
 
     return NextResponse.json(top);
-  } catch (e) {
-    console.error("Languages error:", e);
+  } catch {
     return NextResponse.json([], { status: 500 });
   }
 }

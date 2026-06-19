@@ -25,8 +25,11 @@ export interface GitHubUser {
 export async function fetchGitHubRepos(username: string): Promise<GitHubRepo[]> {
   try {
     const res = await fetch("/api/github/repos");
-    if (!res.ok) throw new Error("Failed to fetch repos");
     const data = await res.json();
+    if (!res.ok || !Array.isArray(data)) {
+      console.error("GitHub repos error:", data);
+      return [];
+    }
     return data
       .filter((repo: GitHubRepo) => !repo.fork)
       .sort((a: GitHubRepo, b: GitHubRepo) =>
@@ -42,8 +45,12 @@ export async function fetchGitHubRepos(username: string): Promise<GitHubRepo[]> 
 export async function fetchGitHubUser(username: string): Promise<GitHubUser | null> {
   try {
     const res = await fetch("/api/github/user");
-    if (!res.ok) throw new Error("Failed to fetch user");
-    return await res.json();
+    const data = await res.json();
+    if (!res.ok || !data?.login) {
+      console.error("GitHub user error:", data);
+      return null;
+    }
+    return data;
   } catch (error) {
     console.error("Error fetching user:", error);
     return null;
