@@ -1,13 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useCallback } from "react";
-import { animate } from "framer-motion";
 
 export default function PaginationHandler() {
-  const animRef = useRef<ReturnType<typeof animate> | null>(null);
-  const accumulated = useRef(0);
-  const resetTimer = useRef<NodeJS.Timeout | null>(null);
+  const isPending = useRef(false);
   const cooldownUntil = useRef(0);
+  const accumulated = useRef(0);
+  const lastWheelTime = useRef(0);
 
   const getSections = useCallback(() => {
     return Array.from(document.querySelectorAll("section[id]")) as HTMLElement[];
@@ -17,55 +16,53 @@ export default function PaginationHandler() {
     const sections = getSections();
     const y = window.scrollY;
     let idx = 0;
-    let minDist = Infinity;
+    let min = Infinity;
     sections.forEach((s, i) => {
-      const dist = Math.abs(s.offsetTop - y);
-      if (dist < minDist) { minDist = dist; idx = i; }
+      const d = Math.abs(s.offsetTop - y);
+      if (d < min) { min = d; idx = i; }
     });
     return idx;
   }, [getSections]);
 
-  const snapRef = useRef<NodeJS.Timeout | null>(null);
+  const scrollToSlide = useCallback((slideIndex: number) => {
+    const sections = getSections();
+    if (isPending.current || slideIndex < 0 || slideIndex >= sections.length) return;
 
-  const snapTo = useCallback((target: number) => {
-    if (animRef.current) animRef.current.stop();
-    if (snapRef.current) clearTimeout(snapRef.current);
+    const target = sections[slideIndex].offsetTop;
+    const from = window.scrollY;
+    const diff = target - from;
+    if (Math.abs(diff) < 5) return;
+
+    const duration = 600;
+    let startTime: number | null = null;
+
+    isPending.current = true;
     accumulated.current = 0;
-    cooldownUntil.current = Date.now() + 900;
 
-    // Find target section and apply blur animation
-    const sections = Array.from(document.querySelectorAll("section[id]")) as HTMLElement[];
-    let targetSection: HTMLElement | null = null;
-    for (const s of sections) {
-      if (Math.abs(s.offsetTop - target) < 2) { targetSection = s; break; }
-    }
-    if (targetSection) {
-      targetSection.classList.remove("blur-snap-in");
-      void targetSection.offsetWidth; // force reflow
-      targetSection.classList.add("blur-snap-in");
-      setTimeout(() => targetSection?.classList.remove("blur-snap-in"), 1600);
-    }
+    sections[slideIndex].classList.remove("blur-snap-in");
+    void sections[slideIndex].offsetWidth;
+    sections[slideIndex].classList.add("blur-snap-in");
+    setTimeout(() => sections[slideIndex]?.classList.remove("blur-snap-in"), 1600);
 
-    animRef.current = animate(window.scrollY, target, {
-      duration: 0.5,
-      ease: [0.16, 1, 0.3, 1],
-      onUpdate: (v) => window.scrollTo(0, v),
-    });
+    function step(time: number) {
+      if (!startTime) startTime = time;
+      const elapsed = time - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // easeOutQuart: fast start, smooth stop
+      const eased = 1 - Math.pow(1 - progress, 4);
+      window.scrollTo(0, from + diff * eased);
 
-    snapRef.current = setTimeout(() => {
-      const sections = Array.from(document.querySelectorAll("section[id]")) as HTMLElement[];
-      const y = window.scrollY;
-      let closest = sections[0];
-      let minDist = Infinity;
-      sections.forEach((s) => {
-        const dist = Math.abs(s.offsetTop - y);
-        if (dist < minDist) { minDist = dist; closest = s; }
-      });
-      if (minDist > 2) {
-        window.scrollTo({ top: closest.offsetTop, behavior: "smooth" });
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        window.scrollTo(0, target);
+        isPending.current = false;
+        cooldownUntil.current = Date.now() + 300;
       }
-    }, 1000);
-  }, []);
+    }
+
+    requestAnimationFrame(step);
+  }, [getSections]);
 
   useEffect(() => {
     if (window.matchMedia("(pointer: coarse)").matches) return;
@@ -74,80 +71,43 @@ export default function PaginationHandler() {
 
     const handleWheel = (e: WheelEvent) => {
       if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+      e.preventDefault();
 
+      if (isPending.current) return;
       if (Date.now() < cooldownUntil.current) {
-        e.preventDefault();
         accumulated.current = 0;
         return;
       }
 
-      // Check if current section has scrollable internal content
-      const sections = getSections();
-      const idx = getCurrentIndex();
-      const sec = sections[idx];
-      if (sec) {
-        const scrollable = sec.querySelector("[data-scroll-inner]") as HTMLElement | null;
-        const secBottom = sec.offsetTop + sec.offsetHeight;
-        const viewBottom = window.scrollY + window.innerHeight;
-        const secExceedsViewport = sec.offsetHeight > window.innerHeight + 10;
+      const now = Date.now();
 
-        if (scrollable) {
-          const atTop = scrollable.scrollTop <= 0;
-          const atBottom = scrollable.scrollTop + scrollable.clientHeight >= scrollable.scrollHeight - 2;
-          const goingDown = e.deltaY > 0;
-          const goingUp = e.deltaY < 0;
-          if ((goingDown && !atBottom) || (goingUp && !atTop)) {
-            return;
-          }
-        } else if (secExceedsViewport) {
-          // Section content exceeds viewport - allow native scroll within it
-          const atTop = window.scrollY <= sec.offsetTop + 2;
-          const atBottom = viewBottom >= secBottom - 2;
-          const goingDown = e.deltaY > 0;
-          const goingUp = e.deltaY < 0;
-          if ((goingDown && !atBottom) || (goingUp && !atTop)) {
-            return;
-          }
-        }
+      // Reset if too much time passed since last scroll
+      if (now - lastWheelTime.current > 200) {
+        accumulated.current = 0;
       }
-
-      e.preventDefault();
+      lastWheelTime.current = now;
 
       accumulated.current += e.deltaY;
 
-      if (resetTimer.current) clearTimeout(resetTimer.current);
-      resetTimer.current = setTimeout(() => { accumulated.current = 0; }, 200);
-
       if (Math.abs(accumulated.current) >= THRESHOLD) {
         const dir = accumulated.current > 0 ? 1 : -1;
-        const sections = getSections();
-        if (sections.length === 0) return;
-        const idx = getCurrentIndex();
-        const next = Math.max(0, Math.min(idx + dir, sections.length - 1));
-        if (sections[next]) snapTo(sections[next].offsetTop);
+        accumulated.current = 0;
+        scrollToSlide(getCurrentIndex() + dir);
       }
     };
 
     const handleKey = (e: KeyboardEvent) => {
-      if (Date.now() < cooldownUntil.current) {
+      if (isPending.current || Date.now() < cooldownUntil.current) {
         e.preventDefault();
         return;
       }
 
       if (["ArrowDown", "PageDown", "Space"].includes(e.code)) {
         e.preventDefault();
-        const s = getSections();
-        if (s.length === 0) return;
-        const i = getCurrentIndex();
-        const next = s[Math.min(i + 1, s.length - 1)];
-        if (next) snapTo(next.offsetTop);
+        scrollToSlide(getCurrentIndex() + 1);
       } else if (["ArrowUp", "PageUp"].includes(e.code)) {
         e.preventDefault();
-        const s = getSections();
-        if (s.length === 0) return;
-        const i = getCurrentIndex();
-        const prev = s[Math.max(i - 1, 0)];
-        if (prev) snapTo(prev.offsetTop);
+        scrollToSlide(getCurrentIndex() - 1);
       }
     };
 
@@ -156,10 +116,8 @@ export default function PaginationHandler() {
     return () => {
       window.removeEventListener("wheel", handleWheel);
       window.removeEventListener("keydown", handleKey);
-      if (resetTimer.current) clearTimeout(resetTimer.current);
-      if (snapRef.current) clearTimeout(snapRef.current);
     };
-  }, [getCurrentIndex, getSections, snapTo]);
+  }, [getCurrentIndex, getSections, scrollToSlide]);
 
   return null;
 }

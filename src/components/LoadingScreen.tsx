@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 
 interface LoadingScreenProps {
   onComplete: () => void;
@@ -18,7 +18,9 @@ interface Fragment {
 
 export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
   const [phase, setPhase] = useState(0);
-  const [isVisible, setIsVisible] = useState(true);
+  const [progress, setProgress] = useState(0);
+  const [done, setDone] = useState(false);
+  const loadedRef = useRef(false);
 
   const word1 = "AURELITH";
   const word2 = "MXPEA";
@@ -45,40 +47,72 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
     }));
   }, []);
 
+  // Track page load
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase(1), 300);
-    const t2 = setTimeout(() => setPhase(2), 2200);
-    const t3 = setTimeout(() => setPhase(3), 3000);
-    const t4 = setTimeout(() => setIsVisible(false), 4000);
-    const t5 = setTimeout(onComplete, 4200);
+    if (document.readyState === "complete") {
+      loadedRef.current = true;
+      return;
+    }
+    const handleLoad = () => { loadedRef.current = true; };
+    window.addEventListener("load", handleLoad);
+    return () => window.removeEventListener("load", handleLoad);
+  }, []);
 
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
-      clearTimeout(t4);
-      clearTimeout(t5);
-    };
-  }, [onComplete]);
+  // Pseudo progress with randomness
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setProgress((p) => {
+        if (p >= 100) return 100;
 
-  if (!isVisible) return null;
+        // Random increment: small when not loaded, faster when loaded
+        const rand = Math.random();
+        let inc;
+        if (loadedRef.current) {
+          inc = 3 + rand * 8; // 3-11% per tick
+        } else {
+          inc = 0.5 + rand * 2; // 0.5-2.5% per tick
+        }
+
+        const next = Math.min(100, p + inc);
+        return next;
+      });
+    }, 120);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // When progress hits 100, wait 1s then trigger exit
+  useEffect(() => {
+    if (progress >= 100 && !done) {
+      const t = setTimeout(() => {
+        setDone(true);
+        setTimeout(onComplete, 800);
+      }, 1000);
+      return () => clearTimeout(t);
+    }
+  }, [progress, done, onComplete]);
+
+  // Start text animation
+  useEffect(() => {
+    setPhase(1);
+  }, []);
 
   return (
     <motion.div
       className="fixed inset-0 z-[10000] overflow-hidden bg-black"
       animate={
-        phase >= 3
+        done
           ? { clipPath: "inset(0 0 0 100%)" }
           : { clipPath: "inset(0 0 0 0%)" }
       }
       transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
     >
-      {/* Accent edge glow on the wipe line */}
+      {/* Accent edge glow */}
       <motion.div
         className="absolute top-0 bottom-0 w-2 bg-accent z-50 pointer-events-none"
         initial={{ left: "0%", opacity: 0 }}
         animate={
-          phase >= 3
+          done
             ? { left: "100%", opacity: [0, 1, 1, 0] }
             : { left: "0%", opacity: 0 }
         }
@@ -86,11 +120,8 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
       />
 
       {/* Subtle gradient */}
-      <motion.div
-        className="absolute inset-0"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0.08 }}
-        transition={{ duration: 3 }}
+      <div
+        className="absolute inset-0 opacity-8"
         style={{
           background:
             "radial-gradient(ellipse at 50% 50%, var(--accent) 0%, transparent 70%)",
@@ -98,7 +129,7 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
       />
 
       {/* Center content */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 md:gap-6">
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 md:gap-8">
         {/* AURELITH */}
         <div className="flex items-center justify-center">
           {fragments1.map((f, i) => (
@@ -123,11 +154,11 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
                       opacity: 1,
                       filter: "blur(0px)",
                     }
-                  : {}
+                  : undefined
               }
               transition={{
                 duration: 1,
-                delay: f.delay,
+                delay: 0.3 + f.delay,
                 ease: [0.22, 1, 0.36, 1],
               }}
             >
@@ -160,11 +191,11 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
                       opacity: 1,
                       filter: "blur(0px)",
                     }
-                  : {}
+                  : undefined
               }
               transition={{
                 duration: 1,
-                delay: f.delay,
+                delay: 0.8 + f.delay,
                 ease: [0.22, 1, 0.36, 1],
               }}
             >
@@ -173,16 +204,24 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
           ))}
         </div>
 
-        {/* Latin text */}
+        {/* Progress bar */}
         <motion.div
-          className="mt-6 md:mt-8"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: phase >= 2 ? 1 : 0, y: phase >= 2 ? 0 : 20 }}
-          transition={{ duration: 0.8 }}
+          className="w-48 md:w-64 mt-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.5, duration: 0.5 }}
         >
-          <p className="text-[10px] md:text-xs font-mono text-white/30 tracking-[0.2em] uppercase">
-            ad perpetranda miracula rei unius
-          </p>
+          <div className="h-[2px] bg-white/10 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-accent/60 via-accent to-accent/60 rounded-full transition-all duration-300 ease-out"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <div className="mt-3 text-center">
+            <span className="text-[10px] font-mono text-white/30 tracking-[0.3em]">
+              {Math.round(progress)}%
+            </span>
+          </div>
         </motion.div>
       </div>
 

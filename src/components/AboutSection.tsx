@@ -23,15 +23,15 @@ function ContributionGraph({ contributions }: { contributions: ContributionDay[]
 
   const weekCount = Math.min(weeks.length, 52);
   const displayWeeks = weeks.slice(-weekCount);
+  const colCount = displayWeeks.length;
 
   return (
-    <div className="relative">
+    <div className="relative w-full">
       <div
-        className="grid gap-[2px] md:gap-[3px] pb-4"
+        className="grid gap-[2px] md:gap-[3px] pb-4 w-full"
         style={{
           gridTemplateRows: "repeat(7, 1fr)",
-          gridAutoFlow: "column",
-          gridAutoColumns: "1fr",
+          gridTemplateColumns: `repeat(${colCount}, 1fr)`,
         }}
       >
         {displayWeeks.map((week) =>
@@ -153,44 +153,38 @@ export default function AboutSection() {
       {/* Background accent */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-accent/5 to-transparent pointer-events-none" />
 
-      {/* Section header */}
-      <div className="relative z-10 text-center mb-16 md:mb-20">
-        <motion.span
-          className="text-xs md:text-sm tracking-[0.2em] md:tracking-[0.3em] text-muted-foreground uppercase"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
-          About
-        </motion.span>
-        <motion.h2
-          className="mt-3 md:mt-4 text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-        >
-          GitHub Activity
-        </motion.h2>
-      </div>
-
       {/* Content - scrollable if exceeds viewport */}
       <div data-scroll-inner className="relative z-10 max-w-[1200px] mx-auto px-4 md:px-8 overflow-y-auto flex-1 max-h-[calc(100vh-200px)]">
-        {/* Intro text */}
-        <motion.div
-          className="text-center mb-12 md:mb-16"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.15 }}
-        >
-          <p className="text-sm md:text-base lg:text-lg text-muted-foreground leading-relaxed">
-            这是我的 GitHub 活动概览，展示了我在开源社区的参与情况和贡献历程。通过这些数据，你可以更好地了解我的技术兴趣、活跃度以及与其他开发者的互动。
-            
-            
-          </p>
-        </motion.div>
+        {/* Section header */}
+        <div className="text-center mb-12 md:mb-16">
+          <motion.span
+            className="text-xs md:text-sm tracking-[0.2em] md:tracking-[0.3em] text-muted-foreground uppercase"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            About
+          </motion.span>
+          <motion.h2
+            className="mt-3 md:mt-4 text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+          >
+            GitHub Activity
+          </motion.h2>
+          <motion.p
+            className="mt-4 text-sm md:text-base text-muted-foreground"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            我的 GitHub 活动概览与贡献历程
+          </motion.p>
+        </div>
 
         {/* GitHub contribution graph */}
         <motion.div
