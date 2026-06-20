@@ -24,6 +24,7 @@
 .DS_Store
 *.pem
 .cache
+.open-next
 
 # debug
 npm-debug.log*
