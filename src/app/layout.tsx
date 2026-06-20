@@ -1,15 +1,21 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const geistSans = Geist({
+const geistSans = localFont({
+  src: [
+    { path: "../../public/fonts/Geist-Regular.woff2", weight: "400", style: "normal" },
+    { path: "../../public/fonts/Geist-Medium.woff2", weight: "500", style: "normal" },
+    { path: "../../public/fonts/Geist-Bold.woff2", weight: "700", style: "normal" },
+  ],
   variable: "--font-geist-sans",
-  subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
+const geistMono = localFont({
+  src: [
+    { path: "../../public/fonts/GeistMono-Regular.woff2", weight: "400", style: "normal" },
+  ],
   variable: "--font-geist-mono",
-  subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
@@ -48,9 +54,11 @@ export default function RootLayout({
     <html
       lang="zh-CN"
       data-theme="dark"
-      className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      className="antialiased"
     >
-      <body className="min-h-screen">{children}</body>
+      <body className={`min-h-screen ${geistSans.variable} ${geistMono.variable}`} style={{ fontFamily: 'var(--font-geist-sans), system-ui, sans-serif', fontWeight: 450 }}>
+        {children}
+      </body>
     </html>
   );
 }

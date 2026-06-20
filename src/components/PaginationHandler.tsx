@@ -5,8 +5,6 @@ import { useEffect, useRef, useCallback } from "react";
 export default function PaginationHandler() {
   const isPending = useRef(false);
   const cooldownUntil = useRef(0);
-  const accumulated = useRef(0);
-  const lastWheelTime = useRef(0);
 
   const getSections = useCallback(() => {
     return Array.from(document.querySelectorAll("section[id]")) as HTMLElement[];
@@ -37,7 +35,6 @@ export default function PaginationHandler() {
     let startTime: number | null = null;
 
     isPending.current = true;
-    accumulated.current = 0;
 
     sections[slideIndex].classList.remove("blur-snap-in");
     void sections[slideIndex].offsetWidth;
@@ -67,33 +64,15 @@ export default function PaginationHandler() {
   useEffect(() => {
     if (window.matchMedia("(pointer: coarse)").matches) return;
 
-    const THRESHOLD = 80;
-
     const handleWheel = (e: WheelEvent) => {
       if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
       e.preventDefault();
 
       if (isPending.current) return;
-      if (Date.now() < cooldownUntil.current) {
-        accumulated.current = 0;
-        return;
-      }
+      if (Date.now() < cooldownUntil.current) return;
 
-      const now = Date.now();
-
-      // Reset if too much time passed since last scroll
-      if (now - lastWheelTime.current > 200) {
-        accumulated.current = 0;
-      }
-      lastWheelTime.current = now;
-
-      accumulated.current += e.deltaY;
-
-      if (Math.abs(accumulated.current) >= THRESHOLD) {
-        const dir = accumulated.current > 0 ? 1 : -1;
-        accumulated.current = 0;
-        scrollToSlide(getCurrentIndex() + dir);
-      }
+      const dir = e.deltaY > 0 ? 1 : -1;
+      scrollToSlide(getCurrentIndex() + dir);
     };
 
     const handleKey = (e: KeyboardEvent) => {

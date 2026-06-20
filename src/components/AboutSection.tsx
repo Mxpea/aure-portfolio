@@ -244,7 +244,7 @@ export default function AboutSection() {
                     </svg>
                   ), 
                   label: "专注领域", 
-                  value: "Frontend, Design Systems" 
+                  value: "AI, Design Systems" 
                 },
                 { 
                   icon: (
@@ -254,7 +254,7 @@ export default function AboutSection() {
                     </svg>
                   ), 
                   label: "常用工具", 
-                  value: "React, Next.js, Tailwind" 
+                  value: "Opencode, Next.js, IntelliJ IDEA" 
                 },
               ].map((item) => (
                 <div key={item.label} className="flex items-center gap-3">
