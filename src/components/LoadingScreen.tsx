@@ -47,15 +47,36 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
     }));
   }, []);
 
-  // Track page load
+  // Track page load - wait for all images
   useEffect(() => {
-    if (document.readyState === "complete") {
-      loadedRef.current = true;
-      return;
-    }
-    const handleLoad = () => { loadedRef.current = true; };
+    const checkReady = () => {
+      // Check if all images are loaded
+      const images = Array.from(document.querySelectorAll("img"));
+      const allLoaded = images.every((img) => img.complete && img.naturalHeight > 0);
+      if (allLoaded) {
+        loadedRef.current = true;
+      }
+    };
+
+    // Check immediately
+    checkReady();
+
+    // Poll until loaded
+    const interval = setInterval(() => {
+      checkReady();
+      if (loadedRef.current) clearInterval(interval);
+    }, 200);
+
+    // Also listen for load event as backup
+    const handleLoad = () => {
+      setTimeout(() => { loadedRef.current = true; }, 500);
+    };
     window.addEventListener("load", handleLoad);
-    return () => window.removeEventListener("load", handleLoad);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("load", handleLoad);
+    };
   }, []);
 
   // Pseudo progress with randomness
