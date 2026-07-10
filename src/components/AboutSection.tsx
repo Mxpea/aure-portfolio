@@ -4,6 +4,7 @@ import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { fetchContributions, fetchUser, fetchTopLanguages, type ContributionDay, type GitHubUser } from "@/lib/github-client";
 import { GITHUB_USERNAME } from "@/lib/config";
+import AnimatedText from "./AnimatedText";
 
 function ContributionGraph({ contributions }: { contributions: ContributionDay[] }) {
   const [hoveredDay, setHoveredDay] = useState<ContributionDay | null>(null);
@@ -174,7 +175,7 @@ export default function AboutSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.1 }}
           >
-            GitHub Activity
+            <AnimatedText text="GitHub Activity" delayPerChar={0.05} initialDelay={0.2} />
           </motion.h2>
           <motion.p
             className="mt-4 text-sm md:text-base text-muted-foreground"

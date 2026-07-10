@@ -4,6 +4,7 @@ import { motion, useScroll, useTransform, useMotionValue, useSpring, animate } f
 import Image from "next/image";
 import { useRef, useEffect, useState, useCallback } from "react";
 import { GITHUB_USERNAME } from "@/lib/config";
+import AnimatedText from "./AnimatedText";
 
 const portraits = ["/aure.webp", "/aure2.webp"];
 
@@ -365,7 +366,12 @@ export default function HeroSection() {
               animate={{ opacity: 1 }}
               transition={{ duration: 1, delay: 1.2 }}
             >
-              创意开发者 & 设计师 — Beyond the infinity
+              <AnimatedText
+                text="创意开发者 & 设计师 — Beyond the infinity"
+                delayPerChar={0.02}
+                initialDelay={1.2}
+                duration={0.4}
+              />
             </motion.p>
 
             {/* Buttons */}

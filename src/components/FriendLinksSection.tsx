@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import AnimatedText from "./AnimatedText";
 
 interface FriendLink {
   name: string;
@@ -62,7 +63,7 @@ export default function FriendLinksSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.1 }}
         >
-          友情链接
+          <AnimatedText text="友情链接" delayPerChar={0.05} initialDelay={0.2} />
         </motion.h2>
       </div>
 

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { fetchRepos, type GitHubRepo } from "@/lib/github-client";
 import { GITHUB_USERNAME } from "@/lib/config";
+import AnimatedText from "./AnimatedText";
 
 const languageColors: Record<string, string> = {
   TypeScript: "from-blue-500/30 to-cyan-500/30",
@@ -143,7 +144,7 @@ export default function WorksSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.1 }}
         >
-          Open Source Works
+          <AnimatedText text="Open Source Works" delayPerChar={0.05} initialDelay={0.2} />
         </motion.h2>
         <motion.p
           className="mt-4 text-sm md:text-base text-muted-foreground"
