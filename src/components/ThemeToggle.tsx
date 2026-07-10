@@ -2,31 +2,23 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
+import { type Theme, getInitialTheme, setTheme as setThemeValue } from "@/lib/theme";
 
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState<"light" | "dark">("dark");
+  const [theme, setThemeState] = useState<Theme>("dark");
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
-    // Check system preference or stored preference
-    const stored = localStorage.getItem("theme") as "light" | "dark" | null;
-    if (stored) {
-      setTheme(stored);
-      document.documentElement.setAttribute("data-theme", stored);
-    } else {
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      const initialTheme = prefersDark ? "dark" : "light";
-      setTheme(initialTheme);
-      document.documentElement.setAttribute("data-theme", initialTheme);
-    }
+    const initial = getInitialTheme();
+    setThemeState(initial);
+    setThemeValue(initial);
   }, []);
 
   const toggleTheme = () => {
-    const newTheme = theme === "dark" ? "light" : "dark";
-    setTheme(newTheme);
-    document.documentElement.setAttribute("data-theme", newTheme);
-    localStorage.setItem("theme", newTheme);
+    const newTheme: Theme = theme === "dark" ? "light" : "dark";
+    setThemeState(newTheme);
+    setThemeValue(newTheme);
   };
 
   if (!isMounted) return null;

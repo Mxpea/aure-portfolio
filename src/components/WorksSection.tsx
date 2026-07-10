@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { fetchGitHubRepos, type GitHubRepo } from "@/lib/github";
+import { fetchRepos, type GitHubRepo } from "@/lib/github-client";
+import { GITHUB_USERNAME } from "@/lib/config";
 
 const languageColors: Record<string, string> = {
   TypeScript: "from-blue-500/30 to-cyan-500/30",
@@ -108,7 +109,7 @@ export default function WorksSection() {
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    fetchGitHubRepos("Mxpea")
+    fetchRepos()
       .then((data) => {
         setRepos(data);
         setLoading(false);
@@ -169,7 +170,7 @@ export default function WorksSection() {
         <div className="text-center py-12">
           <p className="text-muted-foreground mb-2">GitHub 数据加载失败</p>
           <a
-            href="https://github.com/Mxpea"
+            href={`https://github.com/${GITHUB_USERNAME}`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm text-accent hover:underline"
@@ -195,7 +196,7 @@ export default function WorksSection() {
           transition={{ duration: 0.6, delay: 0.3 }}
         >
           <a
-            href="https://github.com/Mxpea?tab=repositories"
+            href={`https://github.com/${GITHUB_USERNAME}?tab=repositories`}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-lg glass text-sm font-medium hover:bg-foreground/10 transition-colors"

@@ -2,7 +2,17 @@
 
 import { useEffect, useRef, useCallback } from "react";
 
-export default function PaginationHandler() {
+interface PaginationHandlerProps {
+  animationDuration?: number;
+  cooldownTime?: number;
+  threshold?: number;
+}
+
+export default function PaginationHandler({
+  animationDuration = 600,
+  cooldownTime = 300,
+  threshold = 5,
+}: PaginationHandlerProps = {}) {
   const isPending = useRef(false);
   const cooldownUntil = useRef(0);
 
@@ -29,9 +39,9 @@ export default function PaginationHandler() {
     const target = sections[slideIndex].offsetTop;
     const from = window.scrollY;
     const diff = target - from;
-    if (Math.abs(diff) < 5) return;
+    if (Math.abs(diff) < threshold) return;
 
-    const duration = 600;
+    const duration = animationDuration;
     let startTime: number | null = null;
 
     isPending.current = true;
@@ -54,7 +64,7 @@ export default function PaginationHandler() {
       } else {
         window.scrollTo(0, target);
         isPending.current = false;
-        cooldownUntil.current = Date.now() + 300;
+        cooldownUntil.current = Date.now() + cooldownTime;
       }
     }
 

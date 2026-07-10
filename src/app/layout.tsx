@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { getThemeScript } from "@/lib/theme";
+import { GITHUB_USERNAME } from "@/lib/config";
 import "./globals.css";
 
 const geistSans = localFont({
@@ -21,7 +23,7 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "Aurelith | Creative Developer & Designer",
   description: "ad perpetranda miracula rei unius... - A creative developer and designer exploring the infinite possibilities of code and aesthetics.",
-  keywords: ["Aurelith", "Mxpea", "creative developer", "designer", "portfolio"],
+  keywords: ["Aurelith", GITHUB_USERNAME, "creative developer", "designer", "portfolio"],
   authors: [{ name: "Aurelith" }],
   icons: {
     icon: [
@@ -53,9 +55,12 @@ export default function RootLayout({
   return (
     <html
       lang="zh-CN"
-      data-theme="dark"
+      suppressHydrationWarning
       className="antialiased"
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: getThemeScript() }} />
+      </head>
       <body className={`min-h-screen ${geistSans.variable} ${geistMono.variable}`} style={{ fontFamily: 'var(--font-geist-sans), system-ui, sans-serif', fontWeight: 450 }}>
         {children}
       </body>

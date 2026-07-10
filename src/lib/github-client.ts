@@ -22,7 +22,12 @@ export interface GitHubUser {
   following: number;
 }
 
-export async function fetchGitHubRepos(username: string): Promise<GitHubRepo[]> {
+export interface ContributionDay {
+  date: string;
+  count: number;
+}
+
+export async function fetchRepos(): Promise<GitHubRepo[]> {
   try {
     const res = await fetch("/api/github/repos");
     const data = await res.json();
@@ -30,19 +35,14 @@ export async function fetchGitHubRepos(username: string): Promise<GitHubRepo[]> 
       console.error("GitHub repos error:", data);
       return [];
     }
-    return data
-      .filter((repo: GitHubRepo) => !repo.fork)
-      .sort((a: GitHubRepo, b: GitHubRepo) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      )
-      .slice(0, 8);
+    return data;
   } catch (error) {
     console.error("Error fetching repos:", error);
     return [];
   }
 }
 
-export async function fetchGitHubUser(username: string): Promise<GitHubUser | null> {
+export async function fetchUser(): Promise<GitHubUser | null> {
   try {
     const res = await fetch("/api/github/user");
     const data = await res.json();
@@ -57,27 +57,30 @@ export async function fetchGitHubUser(username: string): Promise<GitHubUser | nu
   }
 }
 
-export async function fetchTopLanguages(username: string, limit = 2): Promise<string[]> {
+export async function fetchTopLanguages(): Promise<string[]> {
   try {
     const res = await fetch("/api/github/languages");
-    if (!res.ok) throw new Error("Failed to fetch languages");
-    return await res.json();
+    const data = await res.json();
+    if (!res.ok || !Array.isArray(data)) {
+      console.error("GitHub languages error:", data);
+      return [];
+    }
+    return data;
   } catch (error) {
     console.error("Error fetching languages:", error);
     return [];
   }
 }
 
-export interface ContributionDay {
-  date: string;
-  count: number;
-}
-
-export async function fetchGitHubContributions(username: string): Promise<ContributionDay[]> {
+export async function fetchContributions(): Promise<ContributionDay[]> {
   try {
     const res = await fetch("/api/github/contributions");
-    if (!res.ok) throw new Error("Failed to fetch contributions");
-    return await res.json();
+    const data = await res.json();
+    if (!res.ok || !Array.isArray(data)) {
+      console.error("GitHub contributions error:", data);
+      return [];
+    }
+    return data;
   } catch (error) {
     console.error("Error fetching contributions:", error);
     return [];

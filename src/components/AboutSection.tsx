@@ -2,7 +2,8 @@
 
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
-import { fetchGitHubContributions, fetchGitHubUser, fetchTopLanguages, type ContributionDay, type GitHubUser } from "@/lib/github";
+import { fetchContributions, fetchUser, fetchTopLanguages, type ContributionDay, type GitHubUser } from "@/lib/github-client";
+import { GITHUB_USERNAME } from "@/lib/config";
 
 function ContributionGraph({ contributions }: { contributions: ContributionDay[] }) {
   const [hoveredDay, setHoveredDay] = useState<ContributionDay | null>(null);
@@ -99,9 +100,9 @@ function GitHubStatsCard({ user }: { user: GitHubUser | null }) {
           </svg>
         </div>
         <div className="min-w-0">
-          <div className="text-sm font-semibold truncate">{user?.login || "Mxpea"}</div>
+          <div className="text-sm font-semibold truncate">{user?.login || GITHUB_USERNAME}</div>
           <a
-            href={user?.html_url || "https://github.com/Mxpea"}
+            href={user?.html_url || `https://github.com/${GITHUB_USERNAME}`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-xs text-accent hover:underline"
@@ -132,9 +133,9 @@ export default function AboutSection() {
 
   useEffect(() => {
     Promise.all([
-      fetchGitHubContributions("Mxpea"),
-      fetchGitHubUser("Mxpea"),
-      fetchTopLanguages("Mxpea"),
+      fetchContributions(),
+      fetchUser(),
+      fetchTopLanguages(),
     ])
       .then(([contribs, userData, langs]) => {
         setContributions(contribs);

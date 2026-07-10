@@ -1,26 +1,14 @@
 import { NextResponse } from "next/server";
+import { fetchUser } from "@/lib/github-server";
 
 export async function GET() {
-  const token = process.env.GITHUB_TOKEN || process.env.NEXT_PUBLIC_GITHUB_TOKEN;
-  if (!token) {
-    return NextResponse.json({ error: "no_token" }, { status: 500 });
-  }
-
   try {
-    const res = await fetch("https://api.github.com/users/Mxpea", {
-      headers: {
-        Accept: "application/vnd.github.v3+json",
-        Authorization: `bearer ${token}`,
-        "User-Agent": "aure-portfolio",
-      },
-    });
-
-    if (!res.ok) {
-      return NextResponse.json({ error: `github_${res.status}` }, { status: res.status });
-    }
-
-    return NextResponse.json(await res.json());
+    const data = await fetchUser();
+    return NextResponse.json(data);
   } catch (e) {
-    return NextResponse.json({ error: "fetch_failed" }, { status: 500 });
+    return NextResponse.json(
+      { error: "fetch_failed", message: String(e) },
+      { status: 500 }
+    );
   }
 }

@@ -3,6 +3,7 @@
 import { motion, useScroll, useTransform, useMotionValue, useSpring, animate } from "framer-motion";
 import Image from "next/image";
 import { useRef, useEffect, useState, useCallback } from "react";
+import { GITHUB_USERNAME } from "@/lib/config";
 
 const portraits = ["/aure.webp", "/aure2.webp"];
 
@@ -296,7 +297,7 @@ export default function HeroSection() {
                 </span>
               </h1>
 
-              {/* Vertical Mxpea */}
+              {/* Vertical name */}
               <motion.div
                 className="hidden lg:flex absolute -right-12 xl:-right-16 top-0 bottom-0 items-center"
                 initial={{ opacity: 0 }}
@@ -304,7 +305,7 @@ export default function HeroSection() {
                 transition={{ duration: 0.8, delay: 0.7 }}
               >
                 <div className="flex flex-col items-center gap-3 [writing-mode:vertical-lr] rotate-180">
-                  <span className="text-xs font-mono tracking-[0.5em] text-accent uppercase">Mxpea</span>
+                  <span className="text-xs font-mono tracking-[0.5em] text-accent uppercase">{GITHUB_USERNAME}</span>
                   <span className="w-px h-20 bg-gradient-to-b from-accent/50 to-transparent" />
                 </div>
               </motion.div>
@@ -321,7 +322,7 @@ export default function HeroSection() {
                 animate={{ opacity: [0.5, 1, 0.5] }}
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
               >
-                Mxpea
+                {GITHUB_USERNAME}
               </motion.span>
             </motion.div>
 
@@ -382,7 +383,7 @@ export default function HeroSection() {
                 <div className="absolute inset-0 bg-accent translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-300" />
               </a>
               <a
-                href="https://github.com/Mxpea"
+                href={`https://github.com/${GITHUB_USERNAME}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-6 py-3 rounded-lg glass text-sm font-medium hover:bg-foreground/10 transition-colors border border-foreground/10"

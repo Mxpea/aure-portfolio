@@ -2,6 +2,7 @@
 
 import { motion, useInView } from "framer-motion";
 import { useRef, useState } from "react";
+import { GITHUB_USERNAME } from "@/lib/config";
 
 interface SocialLink {
   name: string;
@@ -12,7 +13,7 @@ interface SocialLink {
 const socialLinks: SocialLink[] = [
   {
     name: "GitHub",
-    url: "https://github.com/Mxpea",
+    url: `https://github.com/${GITHUB_USERNAME}`,
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="md:w-6 md:h-6">
         <path

@@ -2,18 +2,8 @@
 
 import { motion, useScroll, useMotionValueEvent } from "framer-motion";
 import { useState } from "react";
-
-interface NavLink {
-  name: string;
-  href: string;
-}
-
-const links: NavLink[] = [
-  { name: "Works", href: "#works" },
-  { name: "About", href: "#about" },
-  { name: "Contact", href: "#contact" },
-  { name: "Links", href: "#links" },
-];
+import { NAV_LINKS } from "@/lib/sections";
+import { GITHUB_USERNAME } from "@/lib/config";
 
 export default function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -62,7 +52,7 @@ export default function Navigation() {
 
             {/* Desktop navigation */}
             <div className="hidden md:flex items-center gap-8">
-              {links.map((link) => (
+              {NAV_LINKS.map((link) => (
                 <motion.button
                   key={link.name}
                   onClick={() => scrollToSection(link.href)}
@@ -74,7 +64,7 @@ export default function Navigation() {
                 </motion.button>
               ))}
               <motion.a
-                href="https://github.com/Mxpea/aure-portfolio"
+                href={`https://github.com/${GITHUB_USERNAME}/aure-portfolio`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-foreground transition-colors"
@@ -150,7 +140,7 @@ export default function Navigation() {
           animate={isMobileMenuOpen ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.3, delay: 0.1 }}
         >
-          {links.map((link, index) => (
+          {NAV_LINKS.map((link, index) => (
             <motion.button
               key={link.name}
               onClick={() => scrollToSection(link.href)}
