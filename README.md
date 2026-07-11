@@ -18,6 +18,7 @@
 - 暗黑/明亮主题切换
 - 自定义光标
 - 友情链接页面（读取 `links.csv`）
+- **逐字符动画** - 标题文字逐个淡入效果（AnimatedText）
 
 ## 快速开始
 
@@ -60,10 +61,12 @@ src/
 │   ├── Navigation.tsx    # 顶部导航
 │   ├── CustomCursor.tsx  # 自定义光标
 │   ├── LoadingScreen.tsx # 加载动画
-│   └── PaginationHandler.tsx # 分页滚动控制
+│   ├── PaginationHandler.tsx # 分页滚动控制
+│   └── AnimatedText.tsx  # 逐字符动画组件
 └── lib/
-    ├── github.ts         # GitHub API 工具
-    └── cache.ts          # 文件缓存
+    ├── github-client.ts  # GitHub API 客户端
+    ├── config.ts         # 配置常量
+    └── theme.ts          # 主题管理
 ```
 
 ## 部署
